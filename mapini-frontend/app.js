@@ -1,7 +1,7 @@
 // ==========================================
 // CONFIGURACIÓN Y VARIABLES GLOBALES
 // ==========================================
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://mapini-backend.onrender.com';
 
 const LAT_INICIAL = -30.3600;
 const LNG_INICIAL = -66.3130;
