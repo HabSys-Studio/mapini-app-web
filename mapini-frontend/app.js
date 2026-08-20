@@ -5,22 +5,26 @@ let userCircle = null;
 let userRadius = null;
 let userLat = null;
 let userLng = null;
+let selectedMarker = null; // Guardar referencia al pin actualmente seleccionado
 
 document.addEventListener('DOMContentLoaded', () => {
     initMainMap();
     setupEventListeners();
 });
 
-// 1. Inicializar Mapa Principal
+// 1. Inicializar Mapa Principal (Sin controles + / -)
 function initMainMap() {
-    map = L.map('map').setView([-30.3600, -66.3130], 15);
+    map = L.map('map', {
+        zoomControl: false
+    }).setView([-30.3600, -66.3130], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; Mapini'
     }).addTo(map);
 
-    // Cerrar panel al hacer clic en un espacio vacío del mapa
+    // Cerrar panel y deseleccionar pin al hacer clic en un espacio vacío
     map.on('click', () => {
+        deseleccionarPin();
         const panel = document.getElementById('panel-info-local');
         if (panel) panel.classList.add('hidden');
     });
@@ -66,6 +70,17 @@ function initMainMap() {
     }
 }
 
+// Restablece el estilo del pin previamente seleccionado
+function deseleccionarPin() {
+    if (selectedMarker) {
+        selectedMarker.setStyle({
+            color: '#ffffff',
+            weight: 2
+        });
+        selectedMarker = null;
+    }
+}
+
 // 2. Cargar Locales desde la API
 async function cargarLocales() {
     try {
@@ -89,7 +104,18 @@ async function cargarLocales() {
 
                 // Evento al hacer clic en el marcador del comercio
                 localMarker.on('click', (e) => {
-                    L.DomEvent.stopPropagation(e); // Evita que el clic pase al mapa y cierre el panel
+                    L.DomEvent.stopPropagation(e);
+
+                    // Restaurar pin anterior
+                    deseleccionarPin();
+
+                    // Resaltar pin seleccionado con borde azul
+                    selectedMarker = localMarker;
+                    selectedMarker.setStyle({
+                        color: '#1a73e8',
+                        weight: 4
+                    });
+
                     mostrarPanelInfo(local);
                 });
             }
@@ -97,6 +123,11 @@ async function cargarLocales() {
     } catch (err) {
         console.error('Error cargando los locales:', err);
     }
+}
+
+// Centrar el mapa en la posición del local seleccionado
+function centrarEnLocal(lat, lng) {
+    map.flyTo([lat, lng], 17, { animate: true, duration: 1.2 });
 }
 
 // Mostrar información en el panel superior fijo
@@ -114,7 +145,10 @@ function mostrarPanelInfo(local) {
         ${local.whatsapp ? `<p><a href="https://wa.me/${local.whatsapp}" target="_blank">📱 Contactar por WhatsApp</a></p>` : ''}
         
         <hr style="margin: 8px 0; border: 0; border-top: 1px solid #eee;">
-        <button onclick="reportarInconsistencia(${local.id})" class="btn-reporte">⚠️ Reportar Local Cerrado</button>
+        <div class="panel-actions">
+            <button onclick="centrarEnLocal(${local.latitud}, ${local.longitud})" class="btn-centrar-local">📍 Ir a la Ubicación</button>
+            <button onclick="reportarInconsistencia(${local.id})" class="btn-reporte">⚠️ Reportar Local Cerrado</button>
+        </div>
     `;
 
     panel.classList.remove('hidden');

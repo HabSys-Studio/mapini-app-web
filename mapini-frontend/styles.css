@@ -73,8 +73,8 @@ html, body {
     border-bottom: 2px solid #e0e0e0;
     padding: 12px 15px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    max-height: 40vh;
+    z-index: 2500;
+    max-height: 45vh;
     overflow-y: auto;
 }
 
@@ -92,6 +92,24 @@ html, body {
     font-size: 13px;
     margin: 3px 0;
     color: #444;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-centrar-local {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 #map {
@@ -127,7 +145,6 @@ html, body {
     padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 8px;
     font-size: 12px;
 }
 
@@ -171,7 +188,7 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
+    z-index: 3000;
 }
 
 .modal.hidden {
