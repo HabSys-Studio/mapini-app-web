@@ -19,6 +19,25 @@ function initMainMap() {
         attribution: '&copy; Mapini'
     }).addTo(map);
 
+    // Agregar control flotante "Ir a mi Ubicación" dentro del mapa
+    const UbicacionControl = L.Control.extend({
+        options: { position: 'bottomright' },
+        onAdd: function () {
+            const btn = L.DomUtil.create('button', 'leaflet-control-ubicacion');
+            btn.innerHTML = '🎯 Ir a mi Ubicación';
+            btn.onclick = function (e) {
+                L.DomEvent.stopPropagation(e);
+                if (userLat && userLng) {
+                    map.flyTo([userLat, userLng], 16, { animate: true, duration: 1.5 });
+                } else {
+                    alert('Aún no hemos detectado tu ubicación GPS.');
+                }
+            };
+            return btn;
+        }
+    });
+    map.addControl(new UbicacionControl());
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -135,16 +154,6 @@ function setupEventListeners() {
     const modalAdmin = document.getElementById('modal-admin');
     const btnAdmin = document.getElementById('btn-admin');
     const btnCerrar = document.getElementById('btn-cerrar-modal');
-    const btnUbicacion = document.getElementById('btn-mi-ubicacion');
-
-    // Botón "Ir a mi Ubicación"
-    btnUbicacion.addEventListener('click', () => {
-        if (userLat && userLng) {
-            map.flyTo([userLat, userLng], 16, { animate: true, duration: 1.5 });
-        } else {
-            alert('Aún no hemos detectado tu ubicación GPS.');
-        }
-    });
 
     // Abrir/Cerrar Modal Administración
     btnAdmin.addEventListener('click', () => modalAdmin.classList.remove('hidden'));

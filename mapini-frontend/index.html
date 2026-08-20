@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mapini</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -19,9 +19,6 @@
         <!-- Contenedor del Mapa Principal -->
         <div id="map"></div>
 
-        <!-- Botón flotante: Ir a mi Ubicación -->
-        <button id="btn-mi-ubicacion" class="btn-ubicacion">🎯 Ir a mi Ubicación</button>
-
         <!-- Modal de Login / Administración -->
         <div id="modal-admin" class="modal hidden">
             <div class="modal-content">
@@ -33,7 +30,7 @@
                     <input type="password" id="password" placeholder="Contraseña" required>
                     
                     <div class="link-container">
-                        <button type="button" id="btn-olvide-pass" class="btn-link">Olvidé mi Usuario y/o Contraseña</button>
+                        <button type="button" id="btn-olvide-pass" class="btn-link">Olvidé mi contraseña</button>
                     </div>
 
                     <button type="submit" class="btn-success">Ingresar</button>
