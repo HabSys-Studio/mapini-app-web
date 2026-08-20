@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapini - Comercios Abiertos en Vivo</title>
+    <title>Mapini</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css">
@@ -12,40 +12,35 @@
 
     <header class="navbar">
         <h1>Mapini</h1>
-        <button id="btn-toggle-form" class="btn-primary">+ Registrar mi Comercio</button>
+        <button id="btn-admin" class="btn-primary">Administración</button>
     </header>
 
     <main class="main-container">
         <!-- Contenedor del Mapa Principal -->
         <div id="map"></div>
 
-        <!-- Modal / Panel de Registro de Local -->
-        <div id="modal-registro" class="modal hidden">
+        <!-- Botón flotante: Ir a mi Ubicación -->
+        <button id="btn-mi-ubicacion" class="btn-ubicacion">🎯 Ir a mi Ubicación</button>
+
+        <!-- Modal de Login / Administración -->
+        <div id="modal-admin" class="modal hidden">
             <div class="modal-content">
                 <span id="btn-cerrar-modal" class="close">&times;</span>
-                <h2>Registrar nuevo comercio</h2>
-                <p class="instruccion">Haz clic en el mapa de abajo para fijar la ubicación exacta de tu local.</p>
+                <h2>Ingreso Administración</h2>
                 
-                <form id="form-comercio">
-                    <input type="text" id="nombre" placeholder="Nombre del Comercio" required>
-                    <input type="text" id="direccion" placeholder="Dirección (ej. Av. San Martín 123)" required>
-                    <input type="text" id="whatsapp" placeholder="WhatsApp de contacto (ej. 5493826000000)" required>
-                    <input type="text" id="medios_pago" placeholder="Medios de pago (ej. Efectivo, Mercado Pago)">
-                    <input type="text" id="promo_del_dia" placeholder="Promo del Día (ej. 15% OFF pagando en efectivo)">
+                <form id="form-login">
+                    <input type="text" id="usuario" placeholder="Usuario" required>
+                    <input type="password" id="password" placeholder="Contraseña" required>
                     
-                    <div class="checkbox-container">
-                        <label>
-                            <input type="checkbox" id="esta_abierto" checked> ¿Está abierto ahora?
-                        </label>
+                    <div class="link-container">
+                        <button type="button" id="btn-olvide-pass" class="btn-link">Olvidé mi contraseña</button>
                     </div>
 
-                    <!-- Mapa interactivo para seleccionar latitud y longitud -->
-                    <div id="mapa-registro"></div>
-
-                    <input type="hidden" id="latitud" required>
-                    <input type="hidden" id="longitud" required>
-
-                    <button type="submit" class="btn-success">Guardar y Activar Local</button>
+                    <button type="submit" class="btn-success">Ingresar</button>
+                    
+                    <div class="register-container">
+                        <button type="button" id="btn-registrarme" class="btn-link-bold">REGISTRARME</button>
+                    </div>
                 </form>
             </div>
         </div>

@@ -1,14 +1,11 @@
-// URL base del backend en Render
 const API_URL = 'https://mapini-backend.onrender.com';
 
-let map, mapaRegistro;
+let map;
 let userCircle = null;
 let userRadius = null;
-let registroMarker = null;
 let userLat = null;
 let userLng = null;
 
-// Inicialización de la App
 document.addEventListener('DOMContentLoaded', () => {
     initMainMap();
     setupEventListeners();
@@ -16,28 +13,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. Inicializar Mapa Principal
 function initMainMap() {
-    // Coordenadas por defecto (Centro por respaldo)
     map = L.map('map').setView([-30.3600, -66.3130], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; Mapini'
     }).addTo(map);
 
-    // Obtener geolocalización en vivo del usuario
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 userLat = pos.coords.latitude;
                 userLng = pos.coords.longitude;
 
-                // Centrar mapa en la ubicación del usuario
                 map.setView([userLat, userLng], 16);
 
-                // Remover marcadores anteriores si existen
                 if (userCircle) map.removeLayer(userCircle);
                 if (userRadius) map.removeLayer(userRadius);
 
-                // Círculo exterior de precisión (Azul traslúcido)
                 userRadius = L.circle([userLat, userLng], {
                     radius: pos.coords.accuracy || 30,
                     color: '#1a73e8',
@@ -46,7 +38,6 @@ function initMainMap() {
                     stroke: false
                 }).addTo(map);
 
-                // Punto central GPS (Azul sólido con borde blanco)
                 userCircle = L.circleMarker([userLat, userLng], {
                     radius: 9,
                     fillColor: '#1a73e8',
@@ -58,11 +49,10 @@ function initMainMap() {
 
                 userCircle.bindPopup('<b>📍 Tu Ubicación Actual</b>').openPopup();
 
-                // Cargar locales desde la base de datos
                 cargarLocales();
             },
             (err) => {
-                console.warn('Error u opción denegada en geolocalización:', err);
+                console.warn('Geolocalización no disponible:', err);
                 cargarLocales();
             },
             { enableHighAccuracy: true, timeout: 10000 }
@@ -72,7 +62,7 @@ function initMainMap() {
     }
 }
 
-// 2. Cargar Locales desde la API de Render
+// 2. Cargar Locales desde la API
 async function cargarLocales() {
     try {
         const res = await fetch(`${API_URL}/api/locales`);
@@ -117,7 +107,7 @@ async function cargarLocales() {
     }
 }
 
-// 3. Sistema de Reportes de Inconsistencia (Local cerrado cuando en app figura abierto)
+// 3. Reportes de Inconsistencia
 async function reportarInconsistencia(comercioId) {
     if (!confirm('¿Confirmas que estás en la ubicación física y el local se encuentra cerrado?')) return;
 
@@ -133,99 +123,42 @@ async function reportarInconsistencia(comercioId) {
         });
 
         if (res.ok) {
-            alert('Reporte enviado con éxito. Auditaremos la veracidad de los datos para comunicar advertencias o penalizar al comercio.');
+            alert('Reporte enviado con éxito. Auditaremos la veracidad de los datos.');
         } else {
-            alert('No se pudo procesar el reporte en este momento.');
+            alert('No se pudo procesar el reporte.');
         }
     } catch (err) {
         console.error('Error enviando reporte:', err);
     }
 }
 
-// 4. Configuración de Eventos y Modal de Registro
+// 4. Configuración de Eventos y Modales
 function setupEventListeners() {
-    const modal = document.getElementById('modal-registro');
-    const btnAbrir = document.getElementById('btn-toggle-form');
+    const modalAdmin = document.getElementById('modal-admin');
+    const btnAdmin = document.getElementById('btn-admin');
     const btnCerrar = document.getElementById('btn-cerrar-modal');
-    const form = document.getElementById('form-comercio');
+    const btnUbicacion = document.getElementById('btn-mi-ubicacion');
 
-    btnAbrir.addEventListener('click', () => {
-        modal.classList.remove('hidden');
-        setTimeout(() => initMapaRegistro(), 200);
-    });
-
-    btnCerrar.addEventListener('click', () => modal.classList.add('hidden'));
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const lat = document.getElementById('latitud').value;
-        const lng = document.getElementById('longitud').value;
-
-        if (!lat || !lng) {
-            alert('Haz clic sobre el mapa interno del formulario para seleccionar la ubicación exacta de tu local.');
-            return;
-        }
-
-        const nuevoComercio = {
-            nombre: document.getElementById('nombre').value,
-            direccion: document.getElementById('direccion').value,
-            whatsapp: document.getElementById('whatsapp').value,
-            medios_pago: document.getElementById('medios_pago').value,
-            promo_del_dia: document.getElementById('promo_del_dia').value,
-            esta_abierto: document.getElementById('esta_abierto').checked,
-            latitud: parseFloat(lat),
-            longitud: parseFloat(lng)
-        };
-
-        try {
-            const res = await fetch(`${API_URL}/api/locales`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nuevoComercio)
-            });
-
-            if (res.ok) {
-                alert('¡Comercio registrado e ingresado con éxito!');
-                form.reset();
-                modal.classList.add('hidden');
-                cargarLocales();
-            } else {
-                alert('Error al registrar el comercio.');
-            }
-        } catch (err) {
-            console.error('Error enviando comercio:', err);
+    // Botón "Ir a mi Ubicación"
+    btnUbicacion.addEventListener('click', () => {
+        if (userLat && userLng) {
+            map.flyTo([userLat, userLng], 16, { animate: true, duration: 1.5 });
+            if (userCircle) userCircle.openPopup();
+        } else {
+            alert('Aún no hemos detectado tu ubicación GPS.');
         }
     });
-}
 
-// 5. Mapa interactivo en el formulario para seleccionar coordenadas del local
-function initMapaRegistro() {
-    const initialLat = userLat || -30.3600;
-    const initialLng = userLng || -66.3130;
+    // Abrir/Cerrar Modal Administración
+    btnAdmin.addEventListener('click', () => modalAdmin.classList.remove('hidden'));
+    btnCerrar.addEventListener('click', () => modalAdmin.classList.add('hidden'));
 
-    if (!mapaRegistro) {
-        mapaRegistro = L.map('mapa-registro').setView([initialLat, initialLng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaRegistro);
+    // Botones dentro del login
+    document.getElementById('btn-olvide-pass').addEventListener('click', () => {
+        alert('Funcionalidad de recuperación de contraseña.');
+    });
 
-        mapaRegistro.on('click', (e) => {
-            const { lat, lng } = e.latlng;
-            document.getElementById('latitud').value = lat;
-            document.getElementById('longitud').value = lng;
-
-            if (registroMarker) {
-                registroMarker.setLatLng(e.latlng);
-            } else {
-                registroMarker = L.marker(e.latlng, { draggable: true }).addTo(mapaRegistro);
-                registroMarker.on('dragend', (evt) => {
-                    const pos = evt.target.getLatLng();
-                    document.getElementById('latitud').value = pos.lat;
-                    document.getElementById('longitud').value = pos.lng;
-                });
-            }
-        });
-    } else {
-        mapaRegistro.invalidateSize();
-        mapaRegistro.setView([initialLat, initialLng], 15);
-    }
+    document.getElementById('btn-registrarme').addEventListener('click', () => {
+        alert('Funcionalidad para iniciar nuevo registro.');
+    });
 }

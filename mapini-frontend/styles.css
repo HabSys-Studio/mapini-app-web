@@ -30,6 +30,22 @@ body, html {
     width: 100%;
 }
 
+/* Botón flotante para recentrar ubicación */
+.btn-ubicacion {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background-color: #ffffff;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
 .btn-primary {
     background-color: #007bff;
     color: white;
@@ -47,7 +63,7 @@ body, html {
     border-radius: 6px;
     cursor: pointer;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .btn-reporte {
@@ -59,6 +75,37 @@ body, html {
     cursor: pointer;
     margin-top: 8px;
     font-size: 12px;
+}
+
+/* Enlaces tipo texto para el login */
+.btn-link {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.btn-link-bold {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.link-container {
+    text-align: right;
+    margin: 5px 0 15px 0;
+}
+
+.register-container {
+    text-align: center;
+    margin-top: 20px;
 }
 
 .modal {
@@ -80,13 +127,15 @@ body, html {
 
 .modal-content {
     background: white;
-    padding: 20px;
+    padding: 25px;
     border-radius: 10px;
     width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 400px;
     position: relative;
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
 }
 
 .close {
@@ -97,24 +146,13 @@ body, html {
     cursor: pointer;
 }
 
-form input[type="text"] {
+form input[type="text"],
+form input[type="password"] {
     width: 100%;
     padding: 10px;
     margin: 8px 0;
     border: 1px solid #ccc;
     border-radius: 5px;
-}
-
-.checkbox-container {
-    margin: 10px 0;
-}
-
-#mapa-registro {
-    height: 200px;
-    width: 100%;
-    margin: 10px 0;
-    border-radius: 6px;
-    border: 1px dashed #007bff;
 }
 
 .estado-tag {
