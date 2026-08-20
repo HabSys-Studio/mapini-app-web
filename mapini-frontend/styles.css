@@ -9,23 +9,52 @@ html, body {
     width: 100%;
     overflow: hidden;
     position: fixed;
+    font-family: system-ui, -apple-system, sans-serif;
 }
 
 .navbar {
-    height: 60px;
+    height: 75px;
     background-color: #1a1a1a;
     color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 15px;
     position: relative;
     z-index: 1000;
 }
 
+.brand-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+.brand-container h1 {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.btn-ubicacion-bar {
+    background: #2b2b2b;
+    color: #4da6ff;
+    border: 1px solid #4da6ff;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-ubicacion-bar:active {
+    background-color: #4da6ff;
+    color: #ffffff;
+}
+
 .main-container {
-    height: calc(100dvh - 60px);
-    height: calc(100vh - 60px);
+    height: calc(100dvh - 75px);
+    height: calc(100vh - 75px);
     width: 100%;
     position: relative;
 }
@@ -35,28 +64,14 @@ html, body {
     width: 100%;
 }
 
-/* Botón de ubicación integrado en Leaflet */
-.leaflet-control-ubicacion {
-    background-color: #ffffff;
-    color: #333;
-    border: 2px solid rgba(0,0,0,0.2);
-    padding: 8px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 13px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    margin-bottom: 25px !important;
-    margin-right: 15px !important;
-}
-
 .btn-primary {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 13px;
 }
 
 .btn-success {
