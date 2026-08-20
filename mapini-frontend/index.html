@@ -1,181 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mapini - Comercio Local en Tiempo Real</title>
-
-  <!-- Leaflet CSS (Mapa) -->
-  <link 
-    rel="stylesheet" 
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
-    crossorigin="" 
-  />
-
-  <!-- Estilos Principales -->
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapini - Comercios Abiertos en Vivo</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Encabezado / Barra Superior -->
-  <header class="navbar">
-    <div class="logo-container">
-      <h1 class="logo">🗺️ Mapini</h1>
-      <span class="tagline">Comercio local en vivo</span>
-    </div>
-    <div class="nav-actions">
-      <button id="btn-mi-ubicacion" class="btn btn-secondary">🎯 Mi Ubicación</button>
-      <button id="btn-login-modal" class="btn btn-primary">🔑 Soy Comerciante</button>
-    </div>
-  </header>
+    <header class="navbar">
+        <h1>Mapini</h1>
+        <button id="btn-toggle-form" class="btn-primary">+ Registrar mi Comercio</button>
+    </header>
 
-  <!-- Contenedor Principal (Mapa y Panel Lateral) -->
-  <main class="main-container">
-    
-    <!-- Mapa Principal -->
-    <div id="map"></div>
+    <main class="main-container">
+        <!-- Contenedor del Mapa Principal -->
+        <div id="map"></div>
 
-    <!-- Panel Lateral de Detalles del Comercio -->
-    <aside id="sidebar-comercio" class="sidebar hidden">
-      <button id="btn-cerrar-sidebar" class="btn-close">&times;</button>
-      
-      <div id="sidebar-contenido">
-        <span id="badge-estado" class="badge">--</span>
-        <h2 id="comercio-nombre">Selecciona un comercio</h2>
-        <p id="comercio-direccion" class="text-muted">📍 --</p>
+        <!-- Modal / Panel de Registro de Local -->
+        <div id="modal-registro" class="modal hidden">
+            <div class="modal-content">
+                <span id="btn-cerrar-modal" class="close">&times;</span>
+                <h2>Registrar nuevo comercio</h2>
+                <p class="instruccion">Haz clic en el mapa de abajo para fijar la ubicación exacta de tu local.</p>
+                
+                <form id="form-comercio">
+                    <input type="text" id="nombre" placeholder="Nombre del Comercio" required>
+                    <input type="text" id="direccion" placeholder="Dirección (ej. Av. San Martín 123)" required>
+                    <input type="text" id="whatsapp" placeholder="WhatsApp de contacto (ej. 5493826000000)" required>
+                    <input type="text" id="medios_pago" placeholder="Medios de pago (ej. Efectivo, Mercado Pago)">
+                    <input type="text" id="promo_del_dia" placeholder="Promo del Día (ej. 15% OFF pagando en efectivo)">
+                    
+                    <div class="checkbox-container">
+                        <label>
+                            <input type="checkbox" id="esta_abierto" checked> ¿Está abierto ahora?
+                        </label>
+                    </div>
 
-        <div class="promo-box">
-          <h3>🔥 Promo del Día</h3>
-          <p id="comercio-promo">Cargando información...</p>
-        </div>
+                    <!-- Mapa interactivo para seleccionar latitud y longitud -->
+                    <div id="mapa-registro"></div>
 
-        <div class="info-seccion">
-          <h4>💳 Medios de Pago</h4>
-          <p id="comercio-pagos">--</p>
-        </div>
+                    <input type="hidden" id="latitud" required>
+                    <input type="hidden" id="longitud" required>
 
-        <div class="info-seccion">
-          <h4>📱 Contacto</h4>
-          <a id="btn-whatsapp" href="#" target="_blank" class="btn btn-whatsapp block hidden">
-            💬 Abrir WhatsApp
-          </a>
-        </div>
-
-        <hr />
-
-        <!-- Sección de Reseñas Positivas y Reportes -->
-        <div class="feedback-seccion">
-          <h4>⭐ Reputación Reciente</h4>
-          <p id="comercio-rating" class="text-highlight">-- / 5.0</p>
-          <button id="btn-dejar-resena" class="btn btn-outline btn-block">
-            ✨ Dejar mensaje positivo
-          </button>
-          
-          <button id="btn-reportar-cerrado" class="btn btn-danger-link btn-block">
-            ⚠️ Reportar "Local Cerrado" (Validación GPS)
-          </button>
-        </div>
-      </div>
-    </aside>
-
-  </main>
-
-  <!-- MODAL: Inicio de Sesión de Comerciante -->
-  <div id="modal-login" class="modal hidden">
-    <div class="modal-content">
-      <button id="btn-cerrar-modal-login" class="btn-close">&times;</button>
-      <h2>🔑 Acceso a Comerciantes</h2>
-      <form id="form-login">
-        <label for="login-email">Email:</label>
-        <input type="email" id="login-email" required placeholder="comercio@ejemplo.com" />
-
-        <label for="login-password">Contraseña:</label>
-        <input type="password" id="login-password" required placeholder="******" />
-
-        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
-      </form>
-      <hr />
-      <p class="text-center">
-        ¿Aún no registraste tu local? 
-        <br />
-        <a href="#" id="link-abrir-registro" style="color: #2563eb; font-weight: bold;">
-          📝 Registra tu negocio aquí
-        </a>
-      </p>
-    </div>
-  </div>
-
-  <!-- MODAL: Registro de Nuevo Comercio con Ajuste de Mapa -->
-  <div id="modal-registro" class="modal hidden">
-    <div class="modal-content modal-large">
-      <button id="btn-cerrar-modal-registro" class="btn-close">&times;</button>
-      <h2>📝 Registrar Mi Comercio en Mapini</h2>
-      <p class="text-muted">Completa los datos de tu negocio para empezar a figurar en el mapa en tiempo real.</p>
-      
-      <form id="form-registro">
-        <div class="form-grid">
-          
-          <!-- Datos Básicos -->
-          <div class="form-group">
-            <label for="reg-nombre">Nombre del Comercio:</label>
-            <input type="text" id="reg-nombre" required placeholder="Ej: Panadería El Sol" />
-
-            <label for="reg-email">Email de Acceso:</label>
-            <input type="email" id="reg-email" required placeholder="contacto@comercio.com" />
-
-            <label for="reg-password">Contraseña:</label>
-            <input type="password" id="reg-password" required placeholder="******" />
-
-            <label for="reg-whatsapp">WhatsApp de Contacto:</label>
-            <input type="text" id="reg-whatsapp" placeholder="+543826123456" />
-
-            <label for="reg-direccion">Dirección Escrita:</label>
-            <div class="input-with-btn">
-              <input type="text" id="reg-direccion" placeholder="Ej: Av. Castro Barros 120, Chamical" />
-              <button type="button" id="btn-buscar-direccion" class="btn btn-secondary">🔍 Buscar</button>
+                    <button type="submit" class="btn-success">Guardar y Activar Local</button>
+                </form>
             </div>
-          </div>
-
-          <!-- Selección y Ubicación Precisa en Mapa -->
-          <div class="form-group">
-            <label>Ubicación Exacta en el Mapa:</label>
-            <p class="help-text">
-              Busca tu calle o presiona el botón para usar tu posición actual. Luego **arrastra el pin verde** hasta la puerta de tu local:
-            </p>
-            
-            <button type="button" id="btn-capturar-gps" class="btn btn-outline btn-block mb-10">
-              📍 Usar mi ubicación GPS actual
-            </button>
-
-            <!-- Contenedor del Mapa para la Ubicación del Registro -->
-            <div id="mapa-registro" class="mapa-registro-container"></div>
-
-            <!-- Datos de Coordenadas Ocultos -->
-            <input type="hidden" id="reg-lat" required />
-            <input type="hidden" id="reg-lng" required />
-            <p id="texto-direccion-detectada" class="direccion-detectada-text">
-              📍 Ubicación no seleccionada
-            </p>
-          </div>
-
         </div>
+    </main>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg mt-15">
-          🚀 Crear Cuenta y Activar Mi Local
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Leaflet JS (Mapa) -->
-  <script 
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
-    crossorigin="">
-  </script>
-
-  <!-- Lógica de la Aplicación -->
-  <script src="app.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

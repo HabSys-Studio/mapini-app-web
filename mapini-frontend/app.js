@@ -1,210 +1,231 @@
-// ==========================================
-// CONFIGURACIÓN Y VARIABLES GLOBALES
-// ==========================================
+// URL base del backend en Render
 const API_URL = 'https://mapini-backend.onrender.com';
 
-const LAT_INICIAL = -30.3600;
-const LNG_INICIAL = -66.3130;
+let map, mapaRegistro;
+let userCircle = null;
+let userRadius = null;
+let registroMarker = null;
+let userLat = null;
+let userLng = null;
 
-let map;
-let mapaRegistro;
-let pinArrastrable;
-let marcadoresLocales = [];
-
-// Iconos de Estado
-const iconoAbierto = L.divIcon({
-  className: 'custom-pin pin-abierto',
-  html: `<div style="background-color: #10b981; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(16,185,129,0.8); cursor: pointer;"></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
-});
-
-const iconoCerrado = L.divIcon({
-  className: 'custom-pin pin-cerrado',
-  html: `<div style="background-color: #ef4444; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(239,68,68,0.8); cursor: pointer;"></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
-});
-
-// Inicialización
+// Inicialización de la App
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("🚀 Mapini Frontend Inicializado");
-  inicializarMapaPrincipal();
-  cargarPinesMapa();
-  setupEventListeners();
+    initMainMap();
+    setupEventListeners();
 });
 
-function inicializarMapaPrincipal() {
-  const mapContainer = document.getElementById('map');
-  if (!mapContainer) {
-    console.error("❌ No se encontró el contenedor #map en el HTML");
-    return;
-  }
-
-  map = L.map('map').setView([LAT_INICIAL, LNG_INICIAL], 15);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
-
-  console.log("🗺️ Mapa Leaflet cargado con éxito");
-}
-
-async function cargarPinesMapa() {
-  try {
-    const respuesta = await fetch(`${API_URL}/comercios`);
-    if (!respuesta.ok) throw new Error(`HTTP error! status: ${respuesta.status}`);
-
-    const comercios = await respuesta.json();
-    console.log("📦 Comercios recibidos del backend:", comercios);
-
-    if (!Array.isArray(comercios)) return;
-
-    marcadoresLocales.forEach(m => map.removeLayer(m));
-    marcadoresLocales = [];
-
-    comercios.forEach(comercio => {
-      const lat = parseFloat(comercio.latitud);
-      const lng = parseFloat(comercio.longitud);
-
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const icono = comercio.esta_abierto ? iconoAbierto : iconoCerrado;
-        const marker = L.marker([lat, lng], { icon: icono }).addTo(map);
-
-        marker.on('click', (e) => {
-          L.DomEvent.stopPropagation(e);
-          abrirSidebarComercio(comercio);
-        });
-
-        marcadoresLocales.push(marker);
-      } else {
-        console.warn(`⚠️ Comercio ID ${comercio.id} (${comercio.nombre}) no tiene coordenadas válidas:`, comercio);
-      }
-    });
-  } catch (error) {
-    console.error("❌ Error conectando a la API de comercios:", error);
-  }
-}
-
-function abrirSidebarComercio(comercio) {
-  const sidebar = document.getElementById('sidebar-comercio');
-  if (!sidebar) return;
-
-  document.getElementById('comercio-nombre').innerText = comercio.nombre || 'Comercio';
-  document.getElementById('comercio-direccion').innerText = `📍 ${comercio.direccion || 'Sin dirección'}`;
-  document.getElementById('comercio-promo').innerText = comercio.promo_del_dia || 'Sin promociones activas hoy.';
-  document.getElementById('comercio-pagos').innerText = comercio.medios_pago || 'Efectivo';
-
-  const ratingElem = document.getElementById('comercio-rating');
-  if (ratingElem) ratingElem.innerText = `⭐ ${comercio.promedio_calificacion || '5.0'} / 5.0`;
-
-  const badge = document.getElementById('badge-estado');
-  if (badge) {
-    badge.innerText = comercio.esta_abierto ? 'ABIERTO AHORA' : 'CERRADO';
-    badge.className = comercio.esta_abierto ? 'badge badge-abierto' : 'badge badge-cerrado';
-  }
-
-  const btnWsp = document.getElementById('btn-whatsapp');
-  if (btnWsp) {
-    if (comercio.whatsapp) {
-      btnWsp.href = `https://wa.me/${comercio.whatsapp.replace(/[^0-9]/g, '')}`;
-      btnWsp.classList.remove('hidden');
-    } else {
-      btnWsp.classList.add('hidden');
-    }
-  }
-
-  sidebar.classList.remove('hidden');
-}
-
-function inicializarMapaRegistro(lat = LAT_INICIAL, lng = LNG_INICIAL) {
-  if (mapaRegistro) mapaRegistro.remove();
-
-  setTimeout(() => {
-    const regContainer = document.getElementById('mapa-registro');
-    if (!regContainer) return;
-
-    mapaRegistro = L.map('mapa-registro').setView([lat, lng], 16);
+// 1. Inicializar Mapa Principal
+function initMainMap() {
+    // Coordenadas por defecto (Centro por respaldo)
+    map = L.map('map').setView([-30.3600, -66.3130], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    }).addTo(mapaRegistro);
+        attribution: '&copy; Mapini'
+    }).addTo(map);
 
-    const iconoPinVerde = L.divIcon({
-      className: 'pin-registro',
-      html: `<div style="background-color: #059669; width: 26px; height: 26px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); cursor: move;"></div>`,
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
-    });
+    // Obtener geolocalización en vivo del usuario
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                userLat = pos.coords.latitude;
+                userLng = pos.coords.longitude;
 
-    pinArrastrable = L.marker([lat, lng], { draggable: true, icon: iconoPinVerde }).addTo(mapaRegistro);
+                // Centrar mapa en la ubicación del usuario
+                map.setView([userLat, userLng], 16);
 
-    pinArrastrable.on('dragend', () => {
-      const pos = pinArrastrable.getLatLng();
-      document.getElementById('reg-lat').value = pos.lat;
-      document.getElementById('reg-lng').value = pos.lng;
-    });
+                // Remover marcadores anteriores si existen
+                if (userCircle) map.removeLayer(userCircle);
+                if (userRadius) map.removeLayer(userRadius);
 
-    document.getElementById('reg-lat').value = lat;
-    document.getElementById('reg-lng').value = lng;
-  }, 250);
+                // Círculo exterior de precisión (Azul traslúcido)
+                userRadius = L.circle([userLat, userLng], {
+                    radius: pos.coords.accuracy || 30,
+                    color: '#1a73e8',
+                    fillColor: '#1a73e8',
+                    fillOpacity: 0.15,
+                    stroke: false
+                }).addTo(map);
+
+                // Punto central GPS (Azul sólido con borde blanco)
+                userCircle = L.circleMarker([userLat, userLng], {
+                    radius: 9,
+                    fillColor: '#1a73e8',
+                    color: '#ffffff',
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 1
+                }).addTo(map);
+
+                userCircle.bindPopup('<b>📍 Tu Ubicación Actual</b>').openPopup();
+
+                // Cargar locales desde la base de datos
+                cargarLocales();
+            },
+            (err) => {
+                console.warn('Error u opción denegada en geolocalización:', err);
+                cargarLocales();
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    } else {
+        cargarLocales();
+    }
 }
 
-function setupEventListeners() {
-  const btnLoginModal = document.getElementById('btn-login-modal');
-  const modalLogin = document.getElementById('modal-login');
-  const btnCerrarLogin = document.getElementById('btn-cerrar-modal-login');
-  const linkRegistro = document.getElementById('link-abrir-registro');
-  const modalRegistro = document.getElementById('modal-registro');
-  const btnCerrarRegistro = document.getElementById('btn-cerrar-modal-registro');
-  const btnCerrarSidebar = document.getElementById('btn-cerrar-sidebar');
-  const btnMiUbicacion = document.getElementById('btn-mi-ubicacion');
+// 2. Cargar Locales desde la API de Render
+async function cargarLocales() {
+    try {
+        const res = await fetch(`${API_URL}/api/locales`);
+        if (!res.ok) throw new Error('Error al consultar comercios');
+        
+        const comercios = await res.json();
 
-  if (btnLoginModal && modalLogin) {
-    btnLoginModal.addEventListener('click', () => {
-      console.log("🔑 Clic en Soy Comerciante");
-      modalLogin.classList.remove('hidden');
-    });
-  } else {
-    console.error("❌ No se encontró btn-login-modal o modal-login");
-  }
+        comercios.forEach(local => {
+            if (local.latitud && local.longitud) {
+                const colorHex = local.esta_abierto ? '#28a745' : '#dc3545';
 
-  if (btnCerrarLogin && modalLogin) {
-    btnCerrarLogin.addEventListener('click', () => {
-      modalLogin.classList.add('hidden');
-    });
-  }
+                const localMarker = L.circleMarker([local.latitud, local.longitud], {
+                    radius: 10,
+                    fillColor: colorHex,
+                    color: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(map);
 
-  if (linkRegistro && modalRegistro && modalLogin) {
-    linkRegistro.addEventListener('click', (e) => {
-      e.preventDefault();
-      modalLogin.classList.add('hidden');
-      modalRegistro.classList.remove('hidden');
-      inicializarMapaRegistro();
-    });
-  }
+                const popupHtml = `
+                    <div class="popup-comercio">
+                        <h3>${local.nombre}</h3>
+                        <span class="estado-tag ${local.esta_abierto ? 'estado-abierto' : 'estado-cerrado'}">
+                            ${local.esta_abierto ? 'ABIERTO' : 'CERRADO'}
+                        </span>
+                        <p><b>Dirección:</b> ${local.direccion || 'Sin datos'}</p>
+                        <p><b>Promo del día:</b> ${local.promo_del_dia || 'Sin promos activas'}</p>
+                        <p><b>Pagos:</b> ${local.medios_pago || 'Consultar'}</p>
+                        ${local.whatsapp ? `<p><a href="https://wa.me/${local.whatsapp}" target="_blank">📱 Contactar por WhatsApp</a></p>` : ''}
+                        
+                        <hr style="margin: 8px 0;">
+                        <button onclick="reportarInconsistencia(${local.id})" class="btn-reporte">⚠️ Reportar Local Cerrado</button>
+                    </div>
+                `;
 
-  if (btnCerrarRegistro && modalRegistro) {
-    btnCerrarRegistro.addEventListener('click', () => {
-      modalRegistro.classList.add('hidden');
-    });
-  }
-
-  if (btnCerrarSidebar) {
-    btnCerrarSidebar.addEventListener('click', () => {
-      const sidebar = document.getElementById('sidebar-comercio');
-      if (sidebar) sidebar.classList.add('hidden');
-    });
-  }
-
-  if (btnMiUbicacion) {
-    btnMiUbicacion.addEventListener('click', () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-          map.setView([pos.coords.latitude, pos.coords.longitude], 17);
+                localMarker.bindPopup(popupHtml);
+            }
         });
-      }
+    } catch (err) {
+        console.error('Error cargando los locales:', err);
+    }
+}
+
+// 3. Sistema de Reportes de Inconsistencia (Local cerrado cuando en app figura abierto)
+async function reportarInconsistencia(comercioId) {
+    if (!confirm('¿Confirmas que estás en la ubicación física y el local se encuentra cerrado?')) return;
+
+    try {
+        const res = await fetch(`${API_URL}/api/reportes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                comercio_id: comercioId,
+                user_lat: userLat,
+                user_lng: userLng
+            })
+        });
+
+        if (res.ok) {
+            alert('Reporte enviado con éxito. Auditaremos la veracidad de los datos para comunicar advertencias o penalizar al comercio.');
+        } else {
+            alert('No se pudo procesar el reporte en este momento.');
+        }
+    } catch (err) {
+        console.error('Error enviando reporte:', err);
+    }
+}
+
+// 4. Configuración de Eventos y Modal de Registro
+function setupEventListeners() {
+    const modal = document.getElementById('modal-registro');
+    const btnAbrir = document.getElementById('btn-toggle-form');
+    const btnCerrar = document.getElementById('btn-cerrar-modal');
+    const form = document.getElementById('form-comercio');
+
+    btnAbrir.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        setTimeout(() => initMapaRegistro(), 200);
     });
-  }
+
+    btnCerrar.addEventListener('click', () => modal.classList.add('hidden'));
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const lat = document.getElementById('latitud').value;
+        const lng = document.getElementById('longitud').value;
+
+        if (!lat || !lng) {
+            alert('Haz clic sobre el mapa interno del formulario para seleccionar la ubicación exacta de tu local.');
+            return;
+        }
+
+        const nuevoComercio = {
+            nombre: document.getElementById('nombre').value,
+            direccion: document.getElementById('direccion').value,
+            whatsapp: document.getElementById('whatsapp').value,
+            medios_pago: document.getElementById('medios_pago').value,
+            promo_del_dia: document.getElementById('promo_del_dia').value,
+            esta_abierto: document.getElementById('esta_abierto').checked,
+            latitud: parseFloat(lat),
+            longitud: parseFloat(lng)
+        };
+
+        try {
+            const res = await fetch(`${API_URL}/api/locales`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevoComercio)
+            });
+
+            if (res.ok) {
+                alert('¡Comercio registrado e ingresado con éxito!');
+                form.reset();
+                modal.classList.add('hidden');
+                cargarLocales();
+            } else {
+                alert('Error al registrar el comercio.');
+            }
+        } catch (err) {
+            console.error('Error enviando comercio:', err);
+        }
+    });
+}
+
+// 5. Mapa interactivo en el formulario para seleccionar coordenadas del local
+function initMapaRegistro() {
+    const initialLat = userLat || -30.3600;
+    const initialLng = userLng || -66.3130;
+
+    if (!mapaRegistro) {
+        mapaRegistro = L.map('mapa-registro').setView([initialLat, initialLng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaRegistro);
+
+        mapaRegistro.on('click', (e) => {
+            const { lat, lng } = e.latlng;
+            document.getElementById('latitud').value = lat;
+            document.getElementById('longitud').value = lng;
+
+            if (registroMarker) {
+                registroMarker.setLatLng(e.latlng);
+            } else {
+                registroMarker = L.marker(e.latlng, { draggable: true }).addTo(mapaRegistro);
+                registroMarker.on('dragend', (evt) => {
+                    const pos = evt.target.getLatLng();
+                    document.getElementById('latitud').value = pos.lat;
+                    document.getElementById('longitud').value = pos.lng;
+                });
+            }
+        });
+    } else {
+        mapaRegistro.invalidateSize();
+        mapaRegistro.setView([initialLat, initialLng], 15);
+    }
 }
