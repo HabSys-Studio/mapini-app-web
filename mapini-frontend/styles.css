@@ -20,8 +20,11 @@ html, body {
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
-    position: relative;
-    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 2000;
 }
 
 .brand-container {
@@ -53,6 +56,7 @@ html, body {
 }
 
 .main-container {
+    margin-top: 75px;
     height: calc(100dvh - 75px);
     height: calc(100vh - 75px);
     width: 100%;
