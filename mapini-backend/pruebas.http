@@ -1,0 +1,50 @@
+### 1. REGISTRAR UN NUEVO COMERCIO (Contraseña encriptada)
+POST http://localhost:3000/api/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Kiosco El Centro",
+  "email": "kiosco_centro@gmail.com",
+  "password": "clave_comercio_123",
+  "whatsapp": "+543826998877",
+  "direccion": "Av. Castro Barros 45",
+  "latitud": -30.3605,
+  "longitud": -66.3130,
+  "metodos_pago": {
+    "efectivo": true,
+    "mercado_pago": true,
+    "uala": false,
+    "tarjetas": true
+  },
+  "ofrece_delivery": false,
+  "promo_del_dia": "2x1 en helados de agua"
+}
+
+###
+
+### 2. INICIAR SESIÓN (Obtener Token JWT)
+# @name login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "kiosco_centro@gmail.com",
+  "password": "clave_comercio_123"
+}
+
+###
+
+### 3. CAMBIAR ESTADO UTILIZANDO EL TOKEN DE SEGURIDAD
+# Copia el token obtenido en el paso anterior y pégalo después de "Bearer "
+PATCH http://localhost:3000/api/comercios/estado
+Authorization: Bearer PEGA_AQUI_EL_TOKEN_DEL_PASO_2
+Content-Type: application/json
+
+{
+  "esta_abierto": true
+}
+
+###
+
+### 4. CONSULTAR EL MAPA GLOBAL
+GET http://localhost:3000/api/comercios/mapa-global

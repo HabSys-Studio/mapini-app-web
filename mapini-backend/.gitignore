@@ -1,0 +1,5 @@
+# Archivos de entorno (contraseñas y claves privadas)
+.env
+
+# Carpetas de librerías pesadas
+node_modules/
