@@ -47,8 +47,6 @@ function initMainMap() {
                     fillOpacity: 1
                 }).addTo(map);
 
-                userCircle.bindPopup('<b>📍 Tu Ubicación Actual</b>').openPopup();
-
                 cargarLocales();
             },
             (err) => {
@@ -143,7 +141,6 @@ function setupEventListeners() {
     btnUbicacion.addEventListener('click', () => {
         if (userLat && userLng) {
             map.flyTo([userLat, userLng], 16, { animate: true, duration: 1.5 });
-            if (userCircle) userCircle.openPopup();
         } else {
             alert('Aún no hemos detectado tu ubicación GPS.');
         }
