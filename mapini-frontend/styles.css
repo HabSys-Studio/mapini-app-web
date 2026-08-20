@@ -63,6 +63,37 @@ html, body {
     position: relative;
 }
 
+/* Panel de Información del Comercio Fijo bajo la Navbar */
+.panel-info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 12px 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.panel-info.hidden {
+    display: none;
+}
+
+.panel-info h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: #1a1a1a;
+}
+
+.panel-info p {
+    font-size: 13px;
+    margin: 3px 0;
+    color: #444;
+}
+
 #map {
     height: 100%;
     width: 100%;

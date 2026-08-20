@@ -19,6 +19,12 @@ function initMainMap() {
         attribution: '&copy; Mapini'
     }).addTo(map);
 
+    // Cerrar panel al hacer clic en un espacio vacío del mapa
+    map.on('click', () => {
+        const panel = document.getElementById('panel-info-local');
+        if (panel) panel.classList.add('hidden');
+    });
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -81,28 +87,37 @@ async function cargarLocales() {
                     fillOpacity: 0.9
                 }).addTo(map);
 
-                const popupHtml = `
-                    <div class="popup-comercio">
-                        <h3>${local.nombre}</h3>
-                        <span class="estado-tag ${local.esta_abierto ? 'estado-abierto' : 'estado-cerrado'}">
-                            ${local.esta_abierto ? 'ABIERTO' : 'CERRADO'}
-                        </span>
-                        <p><b>Dirección:</b> ${local.direccion || 'Sin datos'}</p>
-                        <p><b>Promo del día:</b> ${local.promo_del_dia || 'Sin promos activas'}</p>
-                        <p><b>Pagos:</b> ${local.medios_pago || 'Consultar'}</p>
-                        ${local.whatsapp ? `<p><a href="https://wa.me/${local.whatsapp}" target="_blank">📱 Contactar por WhatsApp</a></p>` : ''}
-                        
-                        <hr style="margin: 8px 0;">
-                        <button onclick="reportarInconsistencia(${local.id})" class="btn-reporte">⚠️ Reportar Local Cerrado</button>
-                    </div>
-                `;
-
-                localMarker.bindPopup(popupHtml);
+                // Evento al hacer clic en el marcador del comercio
+                localMarker.on('click', (e) => {
+                    L.DomEvent.stopPropagation(e); // Evita que el clic pase al mapa y cierre el panel
+                    mostrarPanelInfo(local);
+                });
             }
         });
     } catch (err) {
         console.error('Error cargando los locales:', err);
     }
+}
+
+// Mostrar información en el panel superior fijo
+function mostrarPanelInfo(local) {
+    const panel = document.getElementById('panel-info-local');
+    
+    panel.innerHTML = `
+        <h3>${local.nombre}</h3>
+        <span class="estado-tag ${local.esta_abierto ? 'estado-abierto' : 'estado-cerrado'}">
+            ${local.esta_abierto ? 'ABIERTO' : 'CERRADO'}
+        </span>
+        <p><b>Dirección:</b> ${local.direccion || 'Sin datos'}</p>
+        <p><b>Promo del día:</b> ${local.promo_del_dia || 'Sin promos activas'}</p>
+        <p><b>Pagos:</b> ${local.medios_pago || 'Consultar'}</p>
+        ${local.whatsapp ? `<p><a href="https://wa.me/${local.whatsapp}" target="_blank">📱 Contactar por WhatsApp</a></p>` : ''}
+        
+        <hr style="margin: 8px 0; border: 0; border-top: 1px solid #eee;">
+        <button onclick="reportarInconsistencia(${local.id})" class="btn-reporte">⚠️ Reportar Local Cerrado</button>
+    `;
+
+    panel.classList.remove('hidden');
 }
 
 // 3. Reportes de Inconsistencia
