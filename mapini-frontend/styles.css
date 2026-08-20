@@ -12,31 +12,30 @@ html, body {
     font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* Barra Superior Adaptable */
 .navbar {
-    height: 75px;
+    min-height: 70px;
     background-color: #1a1a1a;
     color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 15px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+    padding: 10px 15px;
+    position: relative;
     z-index: 3000;
+    width: 100%;
 }
 
 .brand-container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 3px;
+    gap: 4px;
 }
 
 .brand-container h1 {
-    font-size: 22px;
-    line-height: 1;
+    font-size: 20px;
+    line-height: 1.1;
 }
 
 .btn-ubicacion-bar {
@@ -55,27 +54,39 @@ html, body {
     color: #ffffff;
 }
 
-.main-container {
-    margin-top: 75px;
-    height: calc(100dvh - 75px);
-    height: calc(100vh - 75px);
-    width: 100%;
-    position: relative;
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    white-space: nowrap;
 }
 
-/* Panel de Información del Comercio Fijo bajo la Navbar */
+/* Contenedor Principal Ajustado al Espacio Restante */
+.main-container {
+    height: calc(100vh - 70px);
+    height: calc(100dvh - 70px);
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Panel de Información del Comercio sin Solapamientos */
 .panel-info {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
     background: #ffffff;
     border-bottom: 2px solid #e0e0e0;
     padding: 12px 15px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     z-index: 2500;
-    max-height: 45vh;
+    max-height: 40vh;
     overflow-y: auto;
+    flex-shrink: 0;
 }
 
 .panel-info.hidden {
@@ -97,7 +108,7 @@ html, body {
 .panel-actions {
     display: flex;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 10px;
     flex-wrap: wrap;
 }
 
@@ -105,28 +116,31 @@ html, body {
     background-color: #1a73e8;
     color: white;
     border: none;
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
     font-weight: bold;
 }
 
-#map {
-    height: 100%;
-    width: 100%;
-}
-
-.btn-primary {
-    background-color: #007bff;
+.btn-reporte {
+    background-color: #dc3545;
     color: white;
     border: none;
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
 }
 
+/* Contenedor del Mapa */
+#map {
+    width: 100%;
+    flex-grow: 1;
+    height: 100%;
+}
+
+/* Estilos de Modales y Utilidades */
 .btn-success {
     background-color: #28a745;
     color: white;
@@ -136,16 +150,6 @@ html, body {
     cursor: pointer;
     width: 100%;
     margin-top: 15px;
-}
-
-.btn-reporte {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
 }
 
 .btn-link {
@@ -227,7 +231,7 @@ form input[type="password"] {
 
 .estado-tag {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 4px;
     font-size: 11px;
     font-weight: bold;
